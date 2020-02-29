@@ -1,8 +1,12 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
+	"register/database"
 )
 
 type User struct {
@@ -17,7 +21,7 @@ func checkRequestMethod(req http.Request, need string) bool {
 	return true
 }
 
-func register(w http.ResponseWriter, req *http.Request){
+func register(w http.ResponseWriter, req *http.Request, db *sql.DB){
 	if checkRequestMethod(*req, "POST"){
 
 		var person User
@@ -44,8 +48,11 @@ func register(w http.ResponseWriter, req *http.Request){
 
 
 func main() {
-
-	http.HandleFunc("/register", register)
+	db, err := database.Connect()
+	if err != nil{
+		log.Fatalln(err)
+	}
+	http.HandleFunc("/register", register())
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
 	}
