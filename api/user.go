@@ -1,29 +1,26 @@
-package main
+package api
 
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
-	"register/database"
 )
 
 type User struct {
-	Email string
+	Email    string
 	Password string
 }
 
-func checkRequestMethod(req http.Request, need string) bool {
-	if req.Method != need{
-		return false
-	}
-	return true
+type RegisterHandler struct {
+	db *sql.DB
 }
 
-func register(w http.ResponseWriter, req *http.Request, db *sql.DB){
-	if checkRequestMethod(*req, "POST"){
+func NewRegisterHandler(db *sql.DB) *RegisterHandler {
+	return &RegisterHandler{db: db}
+}
 
+func (h RegisterHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if checkRequestMethod(*req, "POST") {
 		var person User
 
 		// Try to decode the request body into the struct. If there is an error,
@@ -33,11 +30,11 @@ func register(w http.ResponseWriter, req *http.Request, db *sql.DB){
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		//TODO Register User
+
 		//Здесь буду регать юзера
-
-
-	}else{
+		//TODO Register User
+		h.db.Exec("INSERT INTO users", person.Email, person.Password)
+	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		_, err := w.Write([]byte("This route must run only by POST request"))
 		if err != nil {
@@ -46,15 +43,9 @@ func register(w http.ResponseWriter, req *http.Request, db *sql.DB){
 	}
 }
 
-
-func main() {
-	db, err := database.Connect()
-	if err != nil{
-		log.Fatalln(err)
+func checkRequestMethod(req http.Request, need string) bool {
+	if req.Method != need {
+		return false
 	}
-	http.HandleFunc("/register", register())
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		panic(err)
-	}
-
+	return true
 }
