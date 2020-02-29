@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -30,10 +31,13 @@ func (h RegisterHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		fmt.Println(person)
+
 
 		//Здесь буду регать юзера
 		//TODO Register User
-		h.db.Exec("INSERT INTO users", person.Email, person.Password)
+		result, err := h.db.Exec("INSERT INTO users (email, password) VALUES(?, ?)", person.Email, person.Password)
+		fmt.Println(result, err)
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		_, err := w.Write([]byte("This route must run only by POST request"))
