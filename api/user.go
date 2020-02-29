@@ -33,9 +33,6 @@ func (h RegisterHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 		fmt.Println(person)
 
-
-		//Здесь буду регать юзера
-		//TODO Register User
 		result, err := h.db.Exec("INSERT INTO users (email, password) VALUES(?, ?)", person.Email, person.Password)
 		fmt.Println(result, err)
 	} else {
