@@ -4,8 +4,15 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
+
+//HashPassword generate hash from string to store to database
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
 
 type User struct {
 	Email    string
@@ -26,14 +33,17 @@ func (h RegisterHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 		// Try to decode the request body into the struct. If there is an error,
 		// respond to the client with the error message and a 400 status code.
-		err := json.NewDecoder(req.Body).Decode(&person)
-		if err != nil {
+		if err := json.NewDecoder(req.Body).Decode(&person); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		fmt.Println(person)
 
-		result, err := h.db.Exec("INSERT INTO users (email, password) VALUES(?, ?)", person.Email, person.Password)
+		password, err := HashPassword(person.Password)
+		if err != nil {
+			panic(err)
+		}
+		result, err := h.db.Exec("INSERT INTO users (email, password) VALUES(?, ?)", person.Email, password)
 		fmt.Println(result, err)
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)

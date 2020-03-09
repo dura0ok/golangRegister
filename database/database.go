@@ -6,10 +6,5 @@ import (
 )
 
 func Connect() (*sql.DB, error) {
-	db, err := sql.Open("mysql", "root:123321@/learn")
-
-	if err != nil {
-		return nil, err
-	}
-	return db, nil
+	return sql.Open("mysql", "root:123321@/learn")
 }
