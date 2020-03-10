@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 //HashPassword generate hash from string to store to database
@@ -14,15 +15,18 @@ func HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
+//User struct which store json data from post(email, password)
 type User struct {
 	Email    string
 	Password string
 }
 
+// RegisterHandler allow me add db to http handler
 type RegisterHandler struct {
 	db *sql.DB
 }
 
+// NewRegisterHandler create http handle with db connect
 func NewRegisterHandler(db *sql.DB) *RegisterHandler {
 	return &RegisterHandler{db: db}
 }
